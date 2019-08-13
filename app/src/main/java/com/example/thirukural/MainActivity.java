@@ -1,5 +1,7 @@
 package com.example.thirukural;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
 
     float pbX=0, pbY=0;
 
+    Response<com.example.thirukural.kural> res;
+
     @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
         layoutMaster = (LinearLayout)findViewById(R.id.layoutMaster);
 
-        Typeface tf = Typeface.createFromAsset(getAssets(),"Bamini.ttf");
+        //Typeface tf = Typeface.createFromAsset(getAssets(),"Bamini.ttf");
         explanationArray = new String[3];
         //paal.setTypeface(tf,Typeface.BOLD);
         //kural.setTypeface(tf,Typeface.BOLD);
@@ -117,7 +121,8 @@ public class MainActivity extends AppCompatActivity {
 
 
                 Toast.makeText(getApplicationContext(),"Loading, please wait...",Toast.LENGTH_LONG).show();
-                getKural(Integer.parseInt(kNo.getText().toString()));
+                int kuralNo = Integer.parseInt(kNo.getText().toString());
+                setKuralDetails(kuralNo);
 
                 pbX = pb.getX();
                 pbY = pb.getY();
@@ -159,9 +164,9 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("Amma","" + e.toString());
                 }
 
-                Intent share = new Intent(Intent.ACTION_SEND);
-                share.setType("image/*");
-                share.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("image/*");
+                shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
                 FileOutputStream outputStream = null;
                 try {
@@ -172,17 +177,75 @@ public class MainActivity extends AppCompatActivity {
                     outputStream.close();
 
                     Toast.makeText(getApplicationContext(),"Shared to " + mPath,Toast.LENGTH_SHORT).show();
-                    share.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(imageFile));
-                    getApplicationContext().startActivity(share);
+                    shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(imageFile));
+                    getApplicationContext().startActivity(shareIntent);
+
+                    kNo.setVisibility(View.VISIBLE);
+                    search.setVisibility(View.VISIBLE);
+                    copy.setVisibility(View.VISIBLE);
+                    share.setVisibility(View.VISIBLE);
+
                 } catch (Exception e) {
                     Log.d("KURAL","" + e);
                 }
 
             }
         });
+
+        copy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                int kuralNo = Integer.parseInt(kNo.getText().toString());
+                Call<kural> call = service.getKuralDetails(kuralNo);
+                call.enqueue(new Callback<com.example.thirukural.kural>() {
+                     @Override
+                     public void onResponse(Call<com.example.thirukural.kural> call, Response<com.example.thirukural.kural> response) {
+
+                         //Copying kural..
+                         String copyKural = "";
+                         copyKural = "";
+                         copyKural += "*" + response.body().getPaal() + " - " + response.body().getIyal() + " - " + response.body().getAgaradhi() + " - " + response.body().getNumber() + "*";
+                         copyKural += "\n__________________________________\n";
+                         copyKural += "\n*" + response.body().getLine1() + "*";
+                         copyKural += "\n*" + response.body().getLine2() + "*";
+                         copyKural += "\n__________________________________\n";
+                         copyKural += "\n*" + response.body().getTransliteration1() + "*";
+                         copyKural += "\n*" + response.body().getTransliteration2() + "*";
+                         copyKural += "\n__________________________________\n";
+                         copyKural += "\n*Translation:* " + response.body().getTranslation();
+                         copyKural += "\n__________________________________\n";
+                         copyKural += "\n*Meaning:* " + response.body().getExplanation();
+                         copyKural += "\n__________________________________\n";
+                         copyKural += "\n*அம்மா உரை:* " + response.body().getAmma();
+                         copyKural += "\n__________________________________\n";
+                         copyKural += "\n*மு.வ உரை:* " + response.body().getMv();
+                         copyKural += "\n__________________________________\n";
+                         copyKural += "\n*சாலமன் பாப்பையா உரை:* " + response.body().getSp();
+                         copyKural += "\n__________________________________\n";
+                         copyKural += "\n*மு.கருணாநிதி உரை:* " + response.body().getMk();
+
+                         ClipboardManager clipboard = (ClipboardManager) getSystemService(getApplicationContext().CLIPBOARD_SERVICE);
+                         ClipData clip = ClipData.newPlainText("stravaKural", copyKural);
+                         clipboard.setPrimaryClip(clip);
+
+                         Log.d("Amma", copyKural);
+                         Toast.makeText(getApplicationContext(),"Copied திருக்குறள்...",Toast.LENGTH_SHORT).show();
+
+                     }
+
+                     @Override
+                     public void onFailure(Call<com.example.thirukural.kural> call, Throwable t) {
+                         Log.d("Amma","" + t.toString());
+                     }
+                });
+
+            }
+        });
+
     }
 
-    public void getKural(int kNoo){
+    public void setKuralDetails(int kNoo){
 
         Call<kural> call = service.getKuralDetails(kNoo);
         call.enqueue(new Callback<com.example.thirukural.kural>() {
@@ -242,7 +305,6 @@ public class MainActivity extends AppCompatActivity {
                 pb.setY(pbY);
                 pb.setVisibility(View.INVISIBLE);
                 kNo.setVisibility(View.VISIBLE);
-
             }
 
             @Override
@@ -252,6 +314,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
 }
 
 
