@@ -265,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
                 int resNumber = response.body().getNumber();
 
                 //kural.setText(Html.fromHtml("<b><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + resIyal + " - " + resAgaradhi + " - " + resNumber + "</i></b>"));
-                kural.append("\n" + line1 + "\n" + line2);
+                kural.append(line1 + "\n" + line2);
                 kural.append(Html.fromHtml("<b><i><font color='#FFFFFF'>&nbsp;&nbsp;<u>(" + resIyal + ")" + "</font></i></b></u>"));
 
                 //transliteration.append(Html.fromHtml("<b>Transliteration: </b>"));
