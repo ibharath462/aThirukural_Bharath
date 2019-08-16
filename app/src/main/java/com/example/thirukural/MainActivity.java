@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                          copyKural += "\n__________________________________\n";
                          copyKural += "\n*Meaning:* " + response.body().getExplanation();
                          copyKural += "\n__________________________________\n";
-                         copyKural += "\n*அம்மா உரை:* " + response.body().getAmma();
+                         copyKural += "\n*தமிழ் அம்மா உரை:* " + response.body().getAmma();
                          copyKural += "\n__________________________________\n";
                          copyKural += "\n*மு.வ உரை:* " + response.body().getMv();
                          copyKural += "\n__________________________________\n";
@@ -273,8 +273,8 @@ public class MainActivity extends AppCompatActivity {
                 transliteration.append(Html.fromHtml("<b><i><font color='#FFFFFF'>&nbsp;&nbsp;<u>(" + resAgaradhi + ")" + "(" + resNumber + ")</font></i></b></u>"));
 
                 paal.setText(response.body().getPaal());
-                meaning.append(Html.fromHtml("<b><u>Explanation:</u> " + response.body().getTranslation() + ".</b>"));
-                amma.append(Html.fromHtml("<b><u>அம்மா உரை:</u> " + response.body().getAmma() + "</b>"));
+                meaning.append(Html.fromHtml("<b><u>Explanation:</u></b> " + response.body().getTranslation() + "."));
+                amma.append(Html.fromHtml("<b><u>தமிழ் அம்மா உரை:</u></b> " + response.body().getAmma() + ""));
 
 
                 explanationArray[0] = response.body().getMv();
@@ -282,22 +282,22 @@ public class MainActivity extends AppCompatActivity {
                 explanationArray[2] = response.body().getMk();
 
                 Random rn = new Random();
-                int rInt =  rn.nextInt(3);
+                int rInt =  2;//rn.nextInt(3);
 
                 Log.d("Amma","" + rInt);
                 String explanation = explanationArray[rInt];
 
                 switch (rInt){
                     case 0 :
-                        urai.append(Html.fromHtml("<b><u>மு.வ உரை :</u> " + explanation + ".</b>"));
+                        urai.append(Html.fromHtml("<b><u>மு.வ உரை :</u></b> " + explanation + "."));
                         break;
 
                     case 1 :
-                        urai.append(Html.fromHtml("<b><u>சாலமன் பாப்பையா உரை :</u> " + explanation + ".</b>"));
+                        urai.append(Html.fromHtml("<b><u>சாலமன் பாப்பையா உரை :</u></b> " + explanation + "."));
                         break;
 
                     case 2 :
-                        urai.append(Html.fromHtml("<b><u>மு.கருணாநிதி உரை :</u> " + explanation + ".</b>"));
+                        urai.append(Html.fromHtml("<b><u>மு.கருணாநிதி உரை :</u></b> " + explanation + "."));
                         break;
                 }
 
