@@ -120,7 +120,7 @@
                 android:text=""
                 android:layout_weight="1"
                 android:textColor="@android:color/white"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
 
         </LinearLayout>
 
@@ -152,16 +152,25 @@
                 android:id="@+id/copy"
                 android:layout_width="50dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="40dp"
+                android:layout_marginLeft="20dp"
                 android:backgroundTint="@color/colorAccent"
-                android:text="C"
+                android:text="W"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/gmail"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:backgroundTint="@color/colorAccent"
+                android:layout_marginLeft="20dp"
+                android:text="G"
                 android:textColor="@android:color/white" />
 
             <Button
                 android:id="@+id/share"
                 android:layout_width="50dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="40dp"
+                android:layout_marginLeft="20dp"
                 android:backgroundTint="@color/colorAccent"
                 android:text="Sh"
                 android:textColor="@android:color/white" />

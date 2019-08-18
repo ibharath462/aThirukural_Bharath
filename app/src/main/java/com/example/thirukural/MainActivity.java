@@ -44,7 +44,7 @@ import retrofit2.http.GET;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button search,copy,share;
+    Button search,copy,share,gmail;
 
     LinearLayout layoutMaster;
     TextView paal,kural,transliteration,meaning,amma,urai,date;
@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
         search= (Button)findViewById(R.id.search);
         copy= (Button)findViewById(R.id.copy);
         share= (Button)findViewById(R.id.share);
+        gmail= (Button)findViewById(R.id.gmail);
 
         pb= (ProgressBar) findViewById(R.id.progressBar);
 
@@ -230,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
                          clipboard.setPrimaryClip(clip);
 
                          Log.d("Amma", copyKural);
-                         Toast.makeText(getApplicationContext(),"Copied திருக்குறள்...",Toast.LENGTH_SHORT).show();
+                         Toast.makeText(getApplicationContext(),"Copied திருக்குறள் to Whatsapp...",Toast.LENGTH_SHORT).show();
 
                      }
 
@@ -238,6 +239,57 @@ public class MainActivity extends AppCompatActivity {
                      public void onFailure(Call<com.example.thirukural.kural> call, Throwable t) {
                          Log.d("Amma","" + t.toString());
                      }
+                });
+
+            }
+        });
+
+        gmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                int kuralNo = Integer.parseInt(kNo.getText().toString());
+                Call<kural> call = service.getKuralDetails(kuralNo);
+                call.enqueue(new Callback<com.example.thirukural.kural>() {
+                    @Override
+                    public void onResponse(Call<com.example.thirukural.kural> call, Response<com.example.thirukural.kural> response) {
+
+                        //Copying kural..
+                        String copyKural = "";
+                        copyKural = "";
+                        copyKural += "" + response.body().getPaal() + " - " + response.body().getIyal() + " - " + response.body().getAgaradhi() + " - " + response.body().getNumber();
+                        copyKural += "\n__________________________________\n";
+                        copyKural += "\n" + response.body().getLine1();
+                        copyKural += "\n" + response.body().getLine2();
+                        copyKural += "\n__________________________________\n";
+                        copyKural += "\n" + response.body().getTransliteration1();
+                        copyKural += "\n" + response.body().getTransliteration2();
+                        copyKural += "\n__________________________________\n";
+                        copyKural += "\nTranslation: " + response.body().getTranslation();
+                        copyKural += "\n__________________________________\n";
+                        copyKural += "\nMeaning: " + response.body().getExplanation();
+                        copyKural += "\n__________________________________\n";
+                        copyKural += "\nதமிழ் அம்மா உரை: " + response.body().getAmma();
+                        copyKural += "\n__________________________________\n";
+                        copyKural += "\nமு.வ உரை: " + response.body().getMv();
+                        copyKural += "\n__________________________________\n";
+                        copyKural += "\nசாலமன் பாப்பையா உரை: " + response.body().getSp();
+                        copyKural += "\n__________________________________\n";
+                        copyKural += "\nமு.கருணாநிதி உரை: " + response.body().getMk();
+
+                        ClipboardManager clipboard = (ClipboardManager) getSystemService(getApplicationContext().CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("stravaKural", copyKural);
+                        clipboard.setPrimaryClip(clip);
+
+                        Log.d("Amma", copyKural);
+                        Toast.makeText(getApplicationContext(),"Copied திருக்குறள் to mail...",Toast.LENGTH_SHORT).show();
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<com.example.thirukural.kural> call, Throwable t) {
+                        Log.d("Amma","" + t.toString());
+                    }
                 });
 
             }
