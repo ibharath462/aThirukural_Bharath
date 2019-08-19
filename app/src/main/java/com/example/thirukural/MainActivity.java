@@ -145,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 search.setVisibility(View.INVISIBLE);
                 copy.setVisibility(View.INVISIBLE);
                 share.setVisibility(View.INVISIBLE);
+                gmail.setVisibility(View.INVISIBLE);
 
                 Bitmap bitmap = Bitmap.createBitmap(1080, 1280, Bitmap.Config.ARGB_8888);
                 Canvas canvas = new Canvas(bitmap);
@@ -185,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
                     search.setVisibility(View.VISIBLE);
                     copy.setVisibility(View.VISIBLE);
                     share.setVisibility(View.VISIBLE);
+                    gmail.setVisibility(View.VISIBLE);
 
                 } catch (Exception e) {
                     Log.d("KURAL","" + e);
