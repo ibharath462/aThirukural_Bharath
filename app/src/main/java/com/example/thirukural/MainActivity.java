@@ -90,12 +90,6 @@ public class MainActivity extends AppCompatActivity {
 
         //Typeface tf = Typeface.createFromAsset(getAssets(),"Bamini.ttf");
         explanationArray = new String[3];
-        //paal.setTypeface(tf,Typeface.BOLD);
-        //kural.setTypeface(tf,Typeface.BOLD);
-//        transliteration.setTypeface(tf,Typeface.BOLD);
-//        meaning.setTypeface(tf,Typeface.BOLD);
-//        amma.setTypeface(tf,Typeface.BOLD);
-//        paal.setTypeface(tf,Typeface.BOLD);
 
         //Set date..
         long time = System.currentTimeMillis();
@@ -328,7 +322,19 @@ public class MainActivity extends AppCompatActivity {
 
                 paal.setText(response.body().getPaal());
                 meaning.append(Html.fromHtml("<b><u>Explanation:</u></b> " + response.body().getTranslation() + "."));
-                amma.append(Html.fromHtml("<b><u>தமிழ் அம்மா உரை:</u></b> " + response.body().getAmma() + ""));
+                amma.append(Html.fromHtml("<b><u>தமிழ் அம்மா உரை:</u></b> " + response.body().getAmma() + "."));
+
+                int ammaHeight = amma.getLineCount()* 43;
+                Log.d("Amma","Amma height is : " + amma.getLineCount() + " + " + 43 + " + " + ammaHeight);
+
+                //Dynamically set textsize of amma urai..
+                if(ammaHeight > 172){
+                    amma.setTextSize(13);
+                    Log.d("Amma","Setting 13");
+                }else{
+                    amma.setTextSize(14);
+                    Log.d("Amma","Setting 14");
+                }
 
 
                 explanationArray[0] = response.body().getMv();
@@ -336,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
                 explanationArray[2] = response.body().getMk();
 
                 Random rn = new Random();
-                int rInt =  2;//rn.nextInt(3);
+                int rInt =  rn.nextInt(3);
 
                 Log.d("Amma","" + rInt);
                 String explanation = explanationArray[rInt];
