@@ -3,6 +3,7 @@ package com.example.thirukural;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -33,7 +34,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -305,30 +308,86 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                service = RetrofitStrava.getRetrofitInstance().create(GetDataService.class);
+                //Check at expires...
+                SharedPreferences prefs = getSharedPreferences("kuralAmma", MODE_PRIVATE);
+                final String[] at = {prefs.getString("at", "dbs")};//"No name defined" is the default value.
+                long et = prefs.getLong("et", 0); //0 is the default value.
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date now = new Date();
+                String t  = sdf.format(now);
+                long currentTime = 0;
+                try {
+                    currentTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(t).getTime();
+                    String xx = String.valueOf(currentTime);
+                    Log.d("Strava","" + et);
+                    xx = xx.substring(0,xx.length() - 3);
+                    Log.d("Strava","" + xx);
+                    currentTime = Long.parseLong(xx);
+                } catch (ParseException e) {
+                    Log.d("Strava",e.toString());
+                }
 
-                Call <List<strava>> call = service.getStravaStats();
+                if(currentTime > et || et == 0){
+                    //expired at..
+                    service = RetrofitStravaAuth.getRetrofitInstance().create(GetDataService.class);
+                    Call <authDetails> call = service.getAuthDetails();
+                    Log.d("Strava","  Expiredddddd.." + et + " Current time " + currentTime);
+                    call.enqueue(new Callback<authDetails>() {
 
-                Log.d("Strava","" + call.request().url().toString());
+                        @Override
+                        public void onResponse(Call<authDetails> call, Response<authDetails> response) {
+                            Log.d("Strava"," Accessing...");
+                            authDetails res = response.body();
+                            SharedPreferences.Editor editor = getSharedPreferences("kuralAmma", MODE_PRIVATE).edit();
+                            editor.putString("at", res.getAccess_token());
+                            editor.putLong("et", res.getExpires_at());
+                            editor.apply();
+                            at[0] = res.getAccess_token();
+                            Log.d("Strava"," " + at[0]);
+                            Toast.makeText(getApplicationContext(),"Got new access token....",Toast.LENGTH_SHORT).show();
 
-                call.enqueue(new Callback<List<strava>>() {
+                            getStravaDetails(at[0]);
+                        }
 
-                    @Override
-                    public void onResponse(Call<List<com.example.thirukural.strava>> call, Response<List<com.example.thirukural.strava>> response) {
-                        List<strava> rs = response.body();
-                        rs = rs.subList(0,2);
-                        setStravaDetails(rs);
-                        Log.d("Strava","" + rs.get(0).getDistance());
-                        Toast.makeText(getApplicationContext(),"Got strava details....",Toast.LENGTH_SHORT).show();
-                    }
+                        @Override
+                        public void onFailure(Call<authDetails> call, Throwable t) {
+                            Toast.makeText(getApplicationContext(),"New access tokenb fetch failure...",Toast.LENGTH_SHORT).show();
+                            Log.d("Strava","Errrrorrr " + t.toString());
+                        }
+                    });
+                }else{
+                    getStravaDetails(at[0]);
+                }
 
-                    @Override
-                    public void onFailure(Call<List<com.example.thirukural.strava>> call, Throwable t) {
-                        Log.d("Strava"," " + t.toString());
-                        Toast.makeText(getApplicationContext(),"Auth error strava.....",Toast.LENGTH_SHORT).show();
-                    }
-                });
 
+            }
+        });
+
+    }
+
+    public void getStravaDetails(String at){
+
+        service = RetrofitStrava.getRetrofitInstance().create(GetDataService.class);
+
+        Call <List<strava>> gaCall = service.getStravaStats(at);
+
+        Log.d("Strava","" + gaCall.request().url().toString());
+
+        gaCall.enqueue(new Callback<List<strava>>() {
+
+            @Override
+            public void onResponse(Call<List<com.example.thirukural.strava>> call, Response<List<com.example.thirukural.strava>> response) {
+                List<strava> rs = response.body();
+                rs = rs.subList(0,2);
+                setStravaDetails(rs);
+                Log.d("Strava","" + rs.get(0).getDistance());
+                Toast.makeText(getApplicationContext(),"Got strava details....",Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<List<com.example.thirukural.strava>> call, Throwable t) {
+                Log.d("Strava"," " + t.toString());
+                Toast.makeText(getApplicationContext(),"Auth error strava.....",Toast.LENGTH_SHORT).show();
             }
         });
 
