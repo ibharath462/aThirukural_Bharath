@@ -31,7 +31,10 @@ import com.mayuonline.tamilandroidunicodeutil.TamilUtil;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -44,10 +47,10 @@ import retrofit2.http.GET;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button search,copy,share,gmail;
+    Button search,copy,share,gmail,strava;
 
     LinearLayout layoutMaster;
-    TextView paal,kural,transliteration,meaning,amma,urai,date;
+    TextView paal,kural,transliteration,meaning,amma,urai,date,riD,ruD,rrT;
     EditText kNo;
 
     ProgressBar pb;
@@ -56,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
     String[] explanationArray;
 
-    float pbX=0, pbY=0;
+    float pbX=0, pbY=0, rideDistance = 0, runDistance=0, rrTime=0;
 
     Response<com.example.thirukural.kural> res;
 
@@ -73,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         copy= (Button)findViewById(R.id.copy);
         share= (Button)findViewById(R.id.share);
         gmail= (Button)findViewById(R.id.gmail);
+        strava= (Button)findViewById(R.id.strava);
 
         pb= (ProgressBar) findViewById(R.id.progressBar);
 
@@ -84,6 +88,9 @@ public class MainActivity extends AppCompatActivity {
         amma= (TextView) findViewById(R.id.amma);
         date= (TextView) findViewById(R.id.date);
         kNo= (EditText) findViewById(R.id.kEditText);
+        riD= (TextView) findViewById(R.id.ride);
+        ruD= (TextView) findViewById(R.id.run);
+        rrT= (TextView) findViewById(R.id.rrTime);
 
 
         layoutMaster = (LinearLayout)findViewById(R.id.layoutMaster);
@@ -100,13 +107,14 @@ public class MainActivity extends AppCompatActivity {
         kNo.setText("" + 16);
 
 
-        service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
+        //service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
 
         //Search onClick....
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+                service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
                 //Clear all the previous values...
                 kural.setText("");
                 transliteration.setText("");
@@ -193,6 +201,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
                 int kuralNo = Integer.parseInt(kNo.getText().toString());
                 Call<kural> call = service.getKuralDetails(kuralNo);
                 call.enqueue(new Callback<com.example.thirukural.kural>() {
@@ -244,6 +253,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
                 int kuralNo = Integer.parseInt(kNo.getText().toString());
                 Call<kural> call = service.getKuralDetails(kuralNo);
                 call.enqueue(new Callback<com.example.thirukural.kural>() {
@@ -291,6 +301,69 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        strava.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                service = RetrofitStrava.getRetrofitInstance().create(GetDataService.class);
+
+                Call <List<strava>> call = service.getStravaStats();
+
+                Log.d("Strava","" + call.request().url().toString());
+
+                call.enqueue(new Callback<List<strava>>() {
+
+                    @Override
+                    public void onResponse(Call<List<com.example.thirukural.strava>> call, Response<List<com.example.thirukural.strava>> response) {
+                        List<strava> rs = response.body();
+                        rs = rs.subList(0,2);
+                        setStravaDetails(rs);
+                        Log.d("Strava","" + rs.get(0).getDistance());
+                        Toast.makeText(getApplicationContext(),"Got strava details....",Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<com.example.thirukural.strava>> call, Throwable t) {
+                        Log.d("Strava"," " + t.toString());
+                        Toast.makeText(getApplicationContext(),"Auth error strava.....",Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            }
+        });
+
+    }
+
+    public void setStravaDetails(List<strava> rs){
+        rrTime = 0;
+        for(int i=0; i<=1; i++){
+            strava activity = rs.get(i);
+            if (activity.getType().equals("Ride")){
+                rideDistance = activity.getDistance();
+
+            }else{
+                runDistance = activity.getDistance();
+            }
+            rrTime += activity.getElapsed_time();
+        }
+        DecimalFormat df = new DecimalFormat("#.#");
+        df.setRoundingMode(RoundingMode.CEILING);
+
+        rideDistance = rideDistance / 1000;
+        riD.setText("" + df.format(rideDistance) + " km");
+        runDistance = runDistance / 1000;
+        ruD.setText("" + df.format(runDistance) + " km");
+        rrTime = rrTime / 60;
+        //rrTime = 40;
+        float hr=0, min=0;
+        hr =  rrTime / 60;
+        min = rrTime % 60;
+        if((int)hr == 0){
+            rrT.setText("" + (int)min + "m");
+        }else{
+            rrT.setText((int)hr + "h " + (int)min + "m");
+        }
+        Log.d("Strava"," " + rideDistance + " " + runDistance + " " + rrTime);
     }
 
     public void setKuralDetails(int kNoo){
@@ -322,7 +395,7 @@ public class MainActivity extends AppCompatActivity {
 
                 paal.setText(response.body().getPaal());
                 meaning.append(Html.fromHtml("<b><u>Explanation:</u></b> " + response.body().getTranslation() + "."));
-                amma.append(Html.fromHtml("<b><u>தமிழ் அம்மா உரை:</u></b> " + response.body().getAmma() + "."));
+                amma.append(Html.fromHtml("<b><u>தமிழ் அம்மா உரை:</u></b> " + response.body().getAmma() + ""));
 
                 int ammaHeight = amma.getLineCount()* 43;
                 Log.d("Amma","Amma height is : " + amma.getLineCount() + " + " + 43 + " + " + ammaHeight);
