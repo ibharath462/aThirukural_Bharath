@@ -312,6 +312,7 @@ public class MainActivity extends AppCompatActivity {
                 SharedPreferences prefs = getSharedPreferences("kuralAmma", MODE_PRIVATE);
                 final String[] at = {prefs.getString("at", "dbs")};//"No name defined" is the default value.
                 long et = prefs.getLong("et", 0); //0 is the default value.
+                String rt = prefs.getString("rt", "3ae82db38a7136f6f7ce145d470e5c52a92e7b8c"); //0 is the default value.
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Date now = new Date();
                 String t  = sdf.format(now);
@@ -326,11 +327,11 @@ public class MainActivity extends AppCompatActivity {
                 } catch (ParseException e) {
                     Log.d("Strava",e.toString());
                 }
-
+                et = 0;
                 if(currentTime > et || et == 0){
                     //expired at..
                     service = RetrofitStravaAuth.getRetrofitInstance().create(GetDataService.class);
-                    Call <authDetails> call = service.getAuthDetails();
+                    Call <authDetails> call = service.getAuthDetails(rt);
                     Log.d("Strava","  Expiredddddd.." + et + " Current time " + currentTime);
                     call.enqueue(new Callback<authDetails>() {
 
@@ -341,6 +342,7 @@ public class MainActivity extends AppCompatActivity {
                             SharedPreferences.Editor editor = getSharedPreferences("kuralAmma", MODE_PRIVATE).edit();
                             editor.putString("at", res.getAccess_token());
                             editor.putLong("et", res.getExpires_at());
+                            editor.putString("rt", res.getRefresh_token());
                             editor.apply();
                             at[0] = res.getAccess_token();
                             Log.d("Strava"," " + at[0]);
@@ -352,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(Call<authDetails> call, Throwable t) {
                             Toast.makeText(getApplicationContext(),"New access tokenb fetch failure...",Toast.LENGTH_SHORT).show();
-                            Log.d("Strava","Errrrorrr " + t.toString());
+                            Log.d("Strava"," " + call.request().url().toString() + "\n" + t.toString());
                         }
                     });
                 }else{
