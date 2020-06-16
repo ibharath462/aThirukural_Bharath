@@ -28,13 +28,13 @@
                 android:layout_width="44dp"
                 android:layout_height="34dp"
                 android:layout_gravity="center_vertical"
-                app:srcCompat="@drawable/stravabadge" />
+                app:srcCompat="@drawable/house" />
 
             <TextView
                 android:id="@+id/paal"
                 android:layout_width="146dp"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="60dp"
+                android:layout_marginLeft="30dp"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="Arathupal"
@@ -125,53 +125,15 @@
         android:background="@drawable/kural"
         android:orientation="horizontal">
 
-        <ImageView
-            android:layout_width="44dp"
-            android:layout_height="34dp"
-            android:layout_gravity="center_vertical"
-            app:srcCompat="@drawable/bike" />
-
         <TextView
-            android:id="@+id/ride"
-            android:layout_width="wrap_content"
+            android:id="@+id/mask"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center"
             android:textSize="16sp"
-            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:textColor="#00ff00"
             android:text="20KMs" />
-
-        <ImageView
-            android:layout_width="44dp"
-            android:layout_height="34dp"
-            android:layout_gravity="center_vertical"
-            android:foregroundGravity="center"
-            android:layout_marginLeft="60dp"
-            app:srcCompat="@drawable/run" />
-
-        <TextView
-            android:id="@+id/run"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:textSize="16sp"
-            android:textColor="@android:color/white"
-            android:text="5KMs" />
-
-        <ImageView
-            android:layout_width="44dp"
-            android:layout_height="34dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="60dp"
-            app:srcCompat="@drawable/time" />
-
-        <TextView
-            android:id="@+id/rrTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:textSize="16sp"
-            android:textColor="@android:color/white"
-            android:text="1h50m" />
 
     </LinearLayout>
 
