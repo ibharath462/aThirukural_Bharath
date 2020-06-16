@@ -132,7 +132,7 @@
             android:layout_gravity="center"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#00ff00"
+            android:textColor="#ffffff"
             android:text="20KMs" />
 
     </LinearLayout>
