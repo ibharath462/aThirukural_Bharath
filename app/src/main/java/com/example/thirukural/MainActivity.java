@@ -213,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
 
                          //Copying kural..
                          String copyKural = "";
-                         copyKural = "";
+                         copyKural += "\n__________________________________\n";
                          copyKural += "*" + response.body().getPaal() + " - " + response.body().getIyal() + " - " + response.body().getAgaradhi() + " - " + response.body().getNumber() + "*";
                          copyKural += "\n__________________________________\n";
                          copyKural += "\n*" + response.body().getLine1() + "*";
@@ -233,6 +233,9 @@ public class MainActivity extends AppCompatActivity {
                          copyKural += "\n*சாலமன் பாப்பையா உரை:* " + response.body().getSp();
                          copyKural += "\n__________________________________\n";
                          copyKural += "\n*மு.கருணாநிதி உரை:* " + response.body().getMk();
+                         copyKural += "\n__________________________________\n";
+                         copyKural += "\n\uD83D\uDE37";
+                         copyKural += " _*விழித்திரு விலகி இரு மாஸ்க்குடன் இரு*_ " + "\uD83D\uDE37";
 
                          ClipboardManager clipboard = (ClipboardManager) getSystemService(getApplicationContext().CLIPBOARD_SERVICE);
                          ClipData clip = ClipData.newPlainText("stravaKural", copyKural);
