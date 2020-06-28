@@ -50,10 +50,10 @@ import retrofit2.http.GET;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button search,copy,share,gmail,strava;
+    Button search,copy,share,gmail,strava,telegram;
 
     LinearLayout layoutMaster;
-    TextView paal,kural,transliteration,meaning,amma,urai,date,riD,ruD,rrT;
+    TextView paal,kural,transliteration,meaning,amma,urai,date,mask;
     EditText kNo;
 
     ProgressBar pb;
@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         share= (Button)findViewById(R.id.share);
         gmail= (Button)findViewById(R.id.gmail);
         strava= (Button)findViewById(R.id.strava);
+        telegram= (Button)findViewById(R.id.tel);
 
         pb= (ProgressBar) findViewById(R.id.progressBar);
 
@@ -91,9 +92,9 @@ public class MainActivity extends AppCompatActivity {
         amma= (TextView) findViewById(R.id.amma);
         date= (TextView) findViewById(R.id.date);
         kNo= (EditText) findViewById(R.id.kEditText);
-        riD= (TextView) findViewById(R.id.ride);
-        ruD= (TextView) findViewById(R.id.run);
-        rrT= (TextView) findViewById(R.id.rrTime);
+        mask= (TextView) findViewById(R.id.mask);
+        //ruD= (TextView) findViewById(R.id.run);
+        //rrT= (TextView) findViewById(R.id.rrTime);
 
 
         layoutMaster = (LinearLayout)findViewById(R.id.layoutMaster);
@@ -128,6 +129,10 @@ public class MainActivity extends AppCompatActivity {
 
                 Toast.makeText(getApplicationContext(),"Loading, please wait...",Toast.LENGTH_LONG).show();
                 int kuralNo = Integer.parseInt(kNo.getText().toString());
+                mask.setText("\uD83D\uDE37");
+                mask.append(" ");
+                mask.append(Html.fromHtml("விழித்திரு விலகி இரு மாஸ்க்குடன் இரு "));
+                mask.append("\uD83D\uDE37");
                 setKuralDetails(kuralNo);
 
                 pbX = pb.getX();
@@ -145,13 +150,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                //Hiding the footer
-                kNo.setVisibility(View.INVISIBLE);
-                search.setVisibility(View.INVISIBLE);
-                copy.setVisibility(View.INVISIBLE);
-                share.setVisibility(View.INVISIBLE);
-                gmail.setVisibility(View.INVISIBLE);
-
                 Bitmap bitmap = Bitmap.createBitmap(1080, 1280, Bitmap.Config.ARGB_8888);
                 Canvas canvas = new Canvas(bitmap);
                 Drawable bgDrawable = layoutMaster.getBackground();
@@ -162,18 +160,22 @@ public class MainActivity extends AppCompatActivity {
                 }
                 layoutMaster.draw(canvas);
 
-                String mPath = Environment.getExternalStorageDirectory().getAbsolutePath().toString() + "/"  + "amma.jpeg";
+                String mPath = Environment.getExternalStorageDirectory().getAbsolutePath().toString() + "/Thirukural/"  + "குறள்_" + Integer.parseInt(kNo.getText().toString()) + ".jpeg";
                 File imageFile = new File(mPath);
                 try {
                     imageFile.createNewFile();
+                    final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                    final Uri contentUri = Uri.fromFile(imageFile);
+                    scanIntent.setData(contentUri);
+                    sendBroadcast(scanIntent);
                     Log.d("Amma","Image saved");
                 } catch (IOException e) {
                     Log.d("Amma","" + e.toString());
                 }
 
-                Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                shareIntent.setType("image/*");
-                shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+//                shareIntent.setType("image/*");
+//                shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
                 FileOutputStream outputStream = null;
                 try {
@@ -184,14 +186,9 @@ public class MainActivity extends AppCompatActivity {
                     outputStream.close();
 
                     Toast.makeText(getApplicationContext(),"Shared to " + mPath,Toast.LENGTH_SHORT).show();
-                    shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(imageFile));
-                    getApplicationContext().startActivity(shareIntent);
+                    //shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(imageFile));
+                    //getApplicationContext().startActivity(shareIntent);
 
-                    kNo.setVisibility(View.VISIBLE);
-                    search.setVisibility(View.VISIBLE);
-                    copy.setVisibility(View.VISIBLE);
-                    share.setVisibility(View.VISIBLE);
-                    gmail.setVisibility(View.VISIBLE);
 
                 } catch (Exception e) {
                     Log.d("KURAL","" + e);
@@ -213,7 +210,6 @@ public class MainActivity extends AppCompatActivity {
 
                          //Copying kural..
                          String copyKural = "";
-                         copyKural += "\n__________________________________\n";
                          copyKural += "*" + response.body().getPaal() + " - " + response.body().getIyal() + " - " + response.body().getAgaradhi() + " - " + response.body().getNumber() + "*";
                          copyKural += "\n__________________________________\n";
                          copyKural += "\n*" + response.body().getLine1() + "*";
@@ -255,6 +251,60 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        telegram.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                service = RetrofitClientInstance.getRetrofitInstance().create(GetDataService.class);
+                int kuralNo = Integer.parseInt(kNo.getText().toString());
+                Call<kural> call = service.getKuralDetails(kuralNo);
+                call.enqueue(new Callback<com.example.thirukural.kural>() {
+                    @Override
+                    public void onResponse(Call<com.example.thirukural.kural> call, Response<com.example.thirukural.kural> response) {
+
+                        //Copying kural..
+                        String copyKural = "";
+                        copyKural += "**" + response.body().getPaal() + " - " + response.body().getIyal() + " - " + response.body().getAgaradhi() + " - " + response.body().getNumber() + "**";
+                        copyKural += "\n_______________________________________________\n";
+                        copyKural += "\n**" + response.body().getLine1() + "**";
+                        copyKural += "\n**" + response.body().getLine2() + "**";
+                        copyKural += "\n_______________________________________________\n";
+                        copyKural += "\n**" + response.body().getTransliteration1() + "**";
+                        copyKural += "\n**" + response.body().getTransliteration2() + "**";
+                        copyKural += "\n_______________________________________________\n";
+                        copyKural += "\n**Translation:** " + response.body().getTranslation();
+                        copyKural += "\n_______________________________________________\n";
+                        copyKural += "\n**Meaning:** " + response.body().getExplanation();
+                        copyKural += "\n_______________________________________________\n";
+                        copyKural += "\n**தமிழ் அம்மா உரை:** " + response.body().getAmma();
+                        copyKural += "\n_______________________________________________\n";
+                        copyKural += "\n**மு.வ உரை:** " + response.body().getMv();
+                        copyKural += "\n_______________________________________________\n";
+                        copyKural += "\n**சாலமன் பாப்பையா உரை:** " + response.body().getSp();
+                        copyKural += "\n_______________________________________________\n";
+                        copyKural += "\n**மு.கருணாநிதி உரை:** " + response.body().getMk();
+                        copyKural += "\n_______________________________________________\n";
+                        copyKural += "\n\uD83D\uDE37";
+                        copyKural += " **விழித்திரு விலகி இரு மாஸ்க்குடன் இரு** " + "\uD83D\uDE37";
+
+                        ClipboardManager clipboard = (ClipboardManager) getSystemService(getApplicationContext().CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("stravaKural", copyKural);
+                        clipboard.setPrimaryClip(clip);
+
+                        Log.d("Amma", copyKural);
+                        Toast.makeText(getApplicationContext(),"Copied திருக்குறள் to Telegram...",Toast.LENGTH_SHORT).show();
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<com.example.thirukural.kural> call, Throwable t) {
+                        Log.d("Amma","" + t.toString());
+                    }
+                });
+
+            }
+        });
+
         gmail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -268,8 +318,10 @@ public class MainActivity extends AppCompatActivity {
 
                         //Copying kural..
                         String copyKural = "";
-                        copyKural = "";
-                        copyKural += "" + response.body().getPaal() + " - " + response.body().getIyal() + " - " + response.body().getAgaradhi() + " - " + response.body().getNumber();
+                        copyKural = "\uD83D\uDE37";
+                        copyKural += " விழித்திரு விலகி இரு மாஸ்க்குடன் இரு " + "\uD83D\uDE37";
+                        copyKural += "\n__________________________________\n";
+                        copyKural += "\n" + response.body().getPaal() + " - " + response.body().getIyal() + " - " + response.body().getAgaradhi() + " - " + response.body().getNumber();
                         copyKural += "\n__________________________________\n";
                         copyKural += "\n" + response.body().getLine1();
                         copyKural += "\n" + response.body().getLine2();
@@ -306,6 +358,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+
 
         strava.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -351,7 +405,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.d("Strava"," " + at[0]);
                             Toast.makeText(getApplicationContext(),"Got new access token....",Toast.LENGTH_SHORT).show();
 
-                            getStravaDetails(at[0]);
+                            //getStravaDetails(at[0]);
                         }
 
                         @Override
@@ -361,7 +415,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 }else{
-                    getStravaDetails(at[0]);
+                    //getStravaDetails(at[0]);
                 }
 
 
@@ -369,6 +423,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
+
 
     public void getStravaDetails(String at){
 
@@ -384,7 +440,7 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<List<com.example.thirukural.strava>> call, Response<List<com.example.thirukural.strava>> response) {
                 List<strava> rs = response.body();
                 rs = rs.subList(0,2);
-                setStravaDetails(rs);
+                //setStravaDetails(rs);
                 Log.d("Strava","" + rs.get(0).getDistance());
                 Toast.makeText(getApplicationContext(),"Got strava details....",Toast.LENGTH_SHORT).show();
             }
@@ -398,37 +454,37 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void setStravaDetails(List<strava> rs){
-        rrTime = 0;
-        for(int i=0; i<=1; i++){
-            strava activity = rs.get(i);
-            if (activity.getType().equals("Ride")){
-                rideDistance = activity.getDistance();
-
-            }else{
-                runDistance = activity.getDistance();
-            }
-            rrTime += activity.getElapsed_time();
-        }
-        DecimalFormat df = new DecimalFormat("#.#");
-        df.setRoundingMode(RoundingMode.CEILING);
-
-        rideDistance = rideDistance / 1000;
-        riD.setText("" + df.format(rideDistance) + " km");
-        runDistance = runDistance / 1000;
-        ruD.setText("" + df.format(runDistance) + " km");
-        rrTime = rrTime / 60;
-        //rrTime = 40;
-        float hr=0, min=0;
-        hr =  rrTime / 60;
-        min = rrTime % 60;
-        if((int)hr == 0){
-            rrT.setText("" + (int)min + "m");
-        }else{
-            rrT.setText((int)hr + "h " + (int)min + "m");
-        }
-        Log.d("Strava"," " + rideDistance + " " + runDistance + " " + rrTime);
-    }
+//    public void setStravaDetails(List<strava> rs){
+//        rrTime = 0;
+//        for(int i=0; i<=1; i++){
+//            strava activity = rs.get(i);
+//            if (activity.getType().equals("Ride")){
+//                rideDistance = activity.getDistance();
+//
+//            }else{
+//                runDistance = activity.getDistance();
+//            }
+//            rrTime += activity.getElapsed_time();
+//        }
+//        DecimalFormat df = new DecimalFormat("#.#");
+//        df.setRoundingMode(RoundingMode.CEILING);
+//
+//        rideDistance = rideDistance / 1000;
+//        riD.setText("" + df.format(rideDistance) + " km");
+//        runDistance = runDistance / 1000;
+//        ruD.setText("" + df.format(runDistance) + " km");
+//        rrTime = rrTime / 60;
+//        //rrTime = 40;
+//        float hr=0, min=0;
+//        hr =  rrTime / 60;
+//        min = rrTime % 60;
+//        if((int)hr == 0){
+//            rrT.setText("" + (int)min + "m");
+//        }else{
+//            rrT.setText((int)hr + "h " + (int)min + "m");
+//        }
+//        Log.d("Strava"," " + rideDistance + " " + runDistance + " " + rrTime);
+//    }
 
     public void setKuralDetails(int kNoo){
 
