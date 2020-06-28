@@ -15,6 +15,6 @@ public interface GetDataService {
     @GET("activities?")
     Call<List<strava>> getStravaStats(@Query("access_token") String at);
 
-    @POST("token?client_id=38934&client_secret=8db554338963efb30aa9d56450219103469dd8dc&code=fa164e3f334d44adace5449dcc41b5f71e3a2c9e&grant_type=authorization_code")
-    Call<authDetails> getAuthDetails();
+    @POST("token?client_id=38934&client_secret=8db554338963efb30aa9d56450219103469dd8dc&grant_type=refresh_token")
+    Call<authDetails> getAuthDetails(@Query("refresh_token") String at);
 }
